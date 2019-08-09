@@ -1,0 +1,8 @@
+body {
+    background-image: url(img/bg-home.jpg);
+}
+
+.reveal section img {
+    background: none;
+    border: 0;
+}

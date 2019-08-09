@@ -1,0 +1,386 @@
+---
+title: Quarkus
+highlightTheme: tomorrow-night-blue
+css: style.css
+---
+![Quarkus](img/quarkus-logo.png)
+#### Supersonic Subatomic Java
+
+---
+
+* Quarkus is a Cloud Native, Container First Java framework
+* Crafted from best-of-breed Java libraries and standards
+* Tailored for GraalVM and OpenJDK HotSpot 
+
+---
+
+Alternative to Spring Boot, Micronaut 
+
+---
+
+### Container first
+
+* Fast Startup 
+* Low memory utilization 
+
+Note: 
+* (tens of milliseconds) allows automatic scaling up and down of microservices on containers and Kubernetes as well as Serverless / FaaS on-the-spot execution, scale to zero approach
+* helps optimize container density in microservices architecture deployments requiring multiple containers
+
+---
+
+![Quarkus](img/quarkus_graphics_v3_bootmem_wide_03.png)
+
+---
+
+### Developer Joy
+
+* Unified configuration with all configuration in a single property file.
+ 
+* Zero config, streamlined code for the 80% common usages, flexible for the 20%
+
+* Live reload, debugger starts by default on port 5005
+
+---
+
+* No hassle native executable generation:       
+```commandline
+mvn package -Pnative
+``` 
+
+* Quarkus extension framework reduces the complexity for making third-party frameworks run on Quarkus and compile to a GraalVM native binary
+
+* Kotlin support
+
+---
+
+Use programming model you already know
+
+---
+
+→ Inject dependencies with CDI annotations
+
+---
+
+→ Expose RESTful APIs using JAX-RS 
+
+---
+
+→ Talk to DB with JPA/Hibernate
+
+---
+
+### Eclipse MicroProfile support 
+
+* Write fault-tolerant code
+* Secure apps with MicroProfile JWT
+* Monitor apps with MicroProfile OpenTracing, Metrics and Health
+
+---
+
+### Unifies Imperative and Reactive
+
+Note: 
+* Most Java developers are familiar with the imperative programming model and would like to utilize that experience when adopting a new platform 
+* At the same time, developers are rapidly adopting a cloud native, event-driven, asynchronous, and reactive model to address business requirements to build highly concurrent and responsive applications 
+* Quarkus is designed to seamlessly brings the two models together in the same platform
+
+---
+
+Imperative
+
+```java
+@Inject
+SayService say;
+
+@GET
+@Produces(MediaType.TEXT_PLAIN)
+public String hello() {
+    return say.hello();
+}
+```
+
+---
+
+Reactive
+
+```java
+@Inject @Stream("kafka")
+Publisher<String> reactiveSay;
+
+@GET
+@Produces(MediaType.SERVER_SENT_EVENTS)
+public Publisher<String> stream() { 
+    return reactiveSay; 
+}
+```
+
+---
+
+Get quarked! and let’s start building some hadrons
+
+---
+
+Create a new project:
+
+```commandline
+mvn io.quarkus:quarkus-maven-plugin:0.20.0:create 
+    -DprojectGroupId=com.sabre 
+    -DprojectArtifactId=quarkus-demo 
+    -DclassName="com.sabre.quarkus.GreetingResource" 
+    -Dpath="/hello"
+```
+
+---
+
+Start application in dev mode: 
+
+```commandline 
+mvn compile quarkus:dev 
+``` 
+<!-- .element: style="text-align:center" -->
+
+---
+
+Create class `GreetingService`:
+
+```java
+@ApplicationScoped
+class GreetingService {
+
+    String greeting(String name) {
+        return "Hello, " + name;
+    }
+} 
+```
+
+---
+    
+modify the `GreetingResource` class, injecting the `GreetingService` and adding a new method:
+
+```java
+@Inject
+GreetingService greetingService;
+
+@GET
+@Produces(MediaType.TEXT_PLAIN)
+@Path("/greeting/{name}")
+public String hello(@PathParam("name") String name) { 
+    return greetingService.greeting(name);
+}
+```
+
+---
+
+Create a new property in `application.properties`
+```properties
+greeting=Good morning {0}!
+```
+<!-- .element: style="text-align:center" -->
+
+---
+
+Modify the `GreetingService` to use new property:
+
+```java
+@ConfigProperty(name = "greeting")
+private String greeting;
+
+String greeting(String name){
+    return MessageFormat.format(greeting, name);
+}
+```
+
+---
+
+### Packaging Quarkus application
+
+```commandline
+mvn package
+```
+<!-- .element: style="text-align:center" -->
+
+---
+ 
+#### Produces two jars:
+
+* `quarkus-demo-1.0-SNAPSHOT.jar`
+   * containing just the classes and resources of the projects
+   
+* `quarkus-demo-1.0-SNAPSHOT-runner.jar`
+   * an executable jar with the dependencies copied to `target/lib`
+
+```commandline
+java -jar target/quarkus-demo-1.0-SNAPSHOT-runner.jar
+```
+<!-- .element: style="text-align:center" -->
+
+Note:
+* first - regular artifact produced by the Maven
+* `*-runner.jar` is not a fat jar, it's a thin jar
+    * separates concerns of libraries and our own code
+    * Docker - as long as dependencies are not changed, the library layer is reused and built only once 
+
+---
+
+### Using Hibernate ORM and JPA
+
+```commandline
+mvn quarkus:add-extension 
+    -Dextensions="quarkus-hibernate-orm,quarkus-jdbc-h2,quarkus-smallrye-openapi,quarkus-resteasy-jsonb"
+```
+<!-- .element: style="text-align:center" -->
+
+---
+
+Add configuration to `application.properties`:
+
+```properties
+quarkus.datasource.url=jdbc:h2:mem:test;Mode=Oracle;
+quarkus.datasource.driver=org.h2.Driver
+quarkus.datasource.username=username-default
+quarkus.hibernate-orm.dialect=org.hibernate.dialect.Oracle10gDialect
+quarkus.hibernate-orm.database.generation=create
+quarkus.hibernate-orm.log.sql=true
+```
+
+---
+
+Create an entity class: 
+
+```java
+@Data
+@Entity
+class Gift {
+
+    @Id 
+    @GeneratedValue
+    private Long id;
+    private String name;
+}
+```
+
+---
+
+Create a service:
+
+```java
+@ApplicationScoped
+public class SantaClausService {
+    @Inject
+    EntityManager em;
+
+    List<Gift> all() {
+        return em.createQuery("SELECT e FROM Gift e").getResultList();
+    }
+
+    @Transactional
+    void save(Gift gift) {
+        em.persist(gift);
+    }
+}
+```
+
+---
+
+Create an `import.sql` script in resources:
+
+```sql
+insert into gift values (hibernate_sequence.nextVal, 'Bike');
+insert into gift values (hibernate_sequence.nextVal, 'Motorbike');
+```
+
+---
+
+Create a rest endpoint:
+
+```java
+@Path("/gifts")
+@Produces(MediaType.TEXT_PLAIN)
+@Consumes(MediaType.APPLICATION_JSON)
+public class GiftsResource {
+
+    @Inject
+    SantaClausService santaClausService;
+
+    @GET
+    public List<Gift> gifts() {
+        return santaClausService.all();
+    }
+
+    @POST
+    public void save(Gift gift) {
+        santaClausService.save(gift);
+    }
+}
+```
+
+---
+
+SwaggerUI
+
+Note:
+Bug in `undertow` on Windows using dev mode. Either run from jar or use postman.  
+
+---
+
+Switch to Panache
+
+```commandline
+mvn quarkus:add-extension 
+    -Dextensions="quarkus-hibernate-orm-panache"
+```
+<!-- .element: style="text-align:center" -->
+
+---
+
+* Extend entity class with `PanacheEntity`
+
+* Remove `id` field
+
+* Make use of `PanacheEntity` static methods
+
+Note:
+"IDs are often a touchy subject, and not everyone’s up for letting them handled by the framework" - we can define own ID strategy by extending `PanacheEntityBase` instead of `PanacheEntity` and declaring public ID field.
+
+---
+
+```java
+@Entity
+public class Gift extends PanacheEntity {
+
+    public String name;
+}
+```
+
+---
+
+```commandline
+rm SantaClauseService.java
+```
+<!-- .element: style="text-align:center" -->
+
+---
+
+Update `GiftsResource` class:
+
+```java
+@Path("/gifts")
+@Produces(MediaType.TEXT_PLAIN)
+@Consumes(MediaType.APPLICATION_JSON)
+public class GiftsResource {
+
+    @GET
+    public List<Gift> gifts() {
+        return Gift.listAll();
+    }
+
+    @POST
+    @Transactional
+    public void save(Gift gift) {
+        gift.persist();
+    }
+}
+```
+
+---
