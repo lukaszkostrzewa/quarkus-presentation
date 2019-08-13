@@ -125,9 +125,9 @@ Create a new project:
 
 ```commandline
 mvn io.quarkus:quarkus-maven-plugin:0.20.0:create 
-    -DprojectGroupId=com.sabre 
-    -DprojectArtifactId=quarkus-demo 
-    -DclassName="com.sabre.quarkus.GreetingResource" 
+    -DprojectGroupId=com.example 
+    -DprojectArtifactId=movies-app 
+    -DclassName="com.example.GreetingResource" 
     -Dpath="/hello"
 ```
 
@@ -207,14 +207,14 @@ mvn package
  
 #### Produces two jars:
 
-* `quarkus-demo-1.0-SNAPSHOT.jar`
+* `movies-app-1.0-SNAPSHOT.jar`
    * containing just the classes and resources of the projects
    
-* `quarkus-demo-1.0-SNAPSHOT-runner.jar`
+* `movies-app-1.0-SNAPSHOT-runner.jar`
    * an executable jar with the dependencies copied to `target/lib`
 
 ```commandline
-java -jar target/quarkus-demo-1.0-SNAPSHOT-runner.jar
+java -jar target/movies-app-1.0-SNAPSHOT-runner.jar
 ```
 <!-- .element: style="text-align:center" -->
 
@@ -254,12 +254,14 @@ Create an entity class:
 ```java
 @Data
 @Entity
-class Gift {
+class Movie {
 
     @Id 
     @GeneratedValue
     private Long id;
-    private String name;
+    private String title;
+    private String genre;
+    private int year;
 }
 ```
 
@@ -269,17 +271,17 @@ Create a service:
 
 ```java
 @ApplicationScoped
-public class SantaClausService {
+public class MovieService {
     @Inject
     EntityManager em;
 
-    List<Gift> all() {
-        return em.createQuery("SELECT e FROM Gift e").getResultList();
+    List<Movie> all() {
+        return em.createQuery("SELECT e FROM Movie e").getResultList();
     }
 
     @Transactional
-    void save(Gift gift) {
-        em.persist(gift);
+    void save(Movie movie) {
+        em.persist(movie);
     }
 }
 ```
@@ -289,8 +291,12 @@ public class SantaClausService {
 Create an `import.sql` script in resources:
 
 ```sql
-insert into gift values (hibernate_sequence.nextVal, 'Bike');
-insert into gift values (hibernate_sequence.nextVal, 'Motorbike');
+insert into movie values 
+    (hibernate_sequence.nextVal, 'La vita è bella', 'Comedy, Drama, Romance', 1997),
+    (hibernate_sequence.nextVal, 'The Shawshank Redemption', 'Drama', 1994),
+    (hibernate_sequence.nextVal, 'One Flew Over the Cuckoo''s Nest', 'Drama', 1975),
+    (hibernate_sequence.nextVal, 'The Lord of the Rings: The Fellowship of the Ring', 'Adventure, Drama, Fantasy', 2001),
+    (hibernate_sequence.nextVal, '12 Angry Men', 'Drama', 1957);
 ```
 
 ---
@@ -298,22 +304,22 @@ insert into gift values (hibernate_sequence.nextVal, 'Motorbike');
 Create a rest endpoint:
 
 ```java
-@Path("/gifts")
+@Path("/movies")
 @Produces(MediaType.TEXT_PLAIN)
 @Consumes(MediaType.APPLICATION_JSON)
-public class GiftsResource {
+public class MovieResource {
 
     @Inject
-    SantaClausService santaClausService;
+    MovieService movieService;
 
     @GET
-    public List<Gift> gifts() {
-        return santaClausService.all();
+    public List<Movie> movies() {
+        return movieService.all();
     }
 
     @POST
-    public void save(Gift gift) {
-        santaClausService.save(gift);
+    public void save(Movie movie) {
+        movieService.save(movie);
     }
 }
 ```
@@ -331,7 +337,7 @@ Switch to Panache
 
 ```commandline
 mvn quarkus:add-extension 
-    -Dextensions="quarkus-hibernate-orm-panache"
+    -Dextension="quarkus-hibernate-orm-panache"
 ```
 <!-- .element: style="text-align:center" -->
 
@@ -351,40 +357,120 @@ Note:
 ```java
 @Entity
 @ToString
-public class Gift extends PanacheEntity {
+public class Movie extends PanacheEntity {
 
-    public String name;
+    public String title;
+    public String genre;
+    public int year;
 }
 ```
 
 ---
 
 ```commandline
-rm SantaClauseService.java
+rm MovieService.java
 ```
 <!-- .element: style="text-align:center" -->
 
 ---
 
-Update `GiftsResource` class:
+Update `MovieResource` class:
 
 ```java
-@Path("/gifts")
+@Path("/movies")
 @Produces(MediaType.TEXT_PLAIN)
 @Consumes(MediaType.APPLICATION_JSON)
-public class GiftsResource {
+public class MovieResource {
 
     @GET
-    public List<Gift> gifts() {
-        return Gift.listAll();
+    public List<Movie> movies() {
+        return Movie.listAll();
     }
 
     @POST
     @Transactional
-    public void save(Gift gift) {
-        gift.persist();
+    public void save(Movie movie) {
+        movie.persist();
     }
 }
 ```
+
+---
+
+MicroProfile Rest Client
+
+```commandline
+mvn quarkus:add-extension -Dextension="rest-client"
+```
+<!-- .element: style="text-align:center" -->
+
+---
+
+Create a POJO class:
+
+```java
+@Data
+public class Rating {
+
+    double imdbRating;
+    String imdbVotes;
+    @JsonbProperty("Title")
+    String title;
+}
+```
+
+---
+
+Create an interface
+
+```java
+@Path("/")
+@RegisterRestClient
+public interface RatingService {
+
+    @GET
+    @Produces("application/json")
+    Rating getByTitle(@QueryParam("t") String title);
+}
+```
+
+Note:
+`@RegisterRestClient` allows Quarkus to know that this interface is meant to be available for CDI injection as a REST Client - not needed?
+
+---
+
+Create the configuration
+
+```properties
+com.example.RatingService/mp-rest/url=http://www.omdbapi.com/?apikey=PlzBanMe
+com.example.RatingService/mp-rest/scope=java.inject.Singleton
+```
+
+---
+
+Inject REST client and add a new endpoint
+
+```java
+    @Inject
+    @RestClient
+    RatingService ratingService;
+    
+    @GET
+    @Path("/{title}/rating")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Rating name(@PathParam("title") String name) {
+        return ratingService.getByTitle(name);
+    }
+    
+```
+
+---
+
+MicroProfile Fault Tolerance
+
+```commandline
+mvn quarkus:add-extension -Dextension="smallrye-fault-tolerance"
+```
+<!-- .element: style="text-align:center" -->
 
 ---

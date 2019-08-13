@@ -3,6 +3,11 @@
 Presentation of Quarkus framework with quick workshop containing RESTful API, JPA/Hibernate and Panache. 
 Made using a great library [reval-md](https://github.com/webpro/reveal-md). 
 
+#### Requirements
+
+* Maven > 3.6.1
+* Java < 12
+
 #### Start slides in dev mode
 
 ```commandline
