@@ -170,6 +170,9 @@ public String hello(@PathParam("name") String name) {
 }
 ```
 
+Note:
+Do not use private modifier on injected fields - Quarkus must use reflection fallback to access private members (which entails bigger native executable) or use private fields and package-private constructor. 
+
 ---
 
 Create a new property in `application.properties`
