@@ -1,7 +1,7 @@
 ---
 title: Quarkus
 highlightTheme: tomorrow-night-blue
-css: style.css
+css: css/style.css
 ---
 ![Quarkus](img/quarkus-logo.png)
 #### Supersonic Subatomic Java
@@ -347,6 +347,7 @@ Note:
 
 ```java
 @Entity
+@ToString
 public class Gift extends PanacheEntity {
 
     public String name;
