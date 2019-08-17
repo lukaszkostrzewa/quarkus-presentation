@@ -164,7 +164,7 @@ GreetingService greetingService;
 
 @GET
 @Produces(MediaType.TEXT_PLAIN)
-@Path("/greeting/{name}")
+@Path("/{name}")
 public String hello(@PathParam("name") String name) { 
     return greetingService.greeting(name);
 }
