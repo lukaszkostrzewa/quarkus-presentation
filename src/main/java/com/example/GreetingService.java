@@ -1,6 +1,9 @@
 package com.example;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import javax.enterprise.context.ApplicationScoped;
+import java.text.MessageFormat;
 
 /**
  * @author Lukasz Kostrzewa (SG0221165)
@@ -9,7 +12,10 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 class GreetingService {
 
+    @ConfigProperty(name = "greeting")
+    private String greeting;
+
     String greeting(String name) {
-        return "Hello, " + name;
+        return MessageFormat.format(greeting, name);
     }
 }
