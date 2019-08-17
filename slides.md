@@ -196,6 +196,15 @@ String greeting(String name){
 
 ---
 
+Use _package-private_ modifier: 
+
+```java
+@ConfigProperty(name = "greeting")
+String greeting;
+```
+
+---
+
 ### Packaging Quarkus application
 
 ```commandline

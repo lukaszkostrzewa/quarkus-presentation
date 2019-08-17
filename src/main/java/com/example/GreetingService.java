@@ -13,7 +13,7 @@ import java.text.MessageFormat;
 class GreetingService {
 
     @ConfigProperty(name = "greeting")
-    private String greeting;
+    String greeting;
 
     String greeting(String name) {
         return MessageFormat.format(greeting, name);
