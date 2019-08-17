@@ -124,10 +124,10 @@ Get quarked! and let’s start building some hadrons
 Create a new project:
 
 ```commandline
-mvn io.quarkus:quarkus-maven-plugin:0.20.0:create 
-    -DprojectGroupId=com.example 
-    -DprojectArtifactId=movies-app 
-    -DclassName="com.example.GreetingResource" 
+mvn io.quarkus:quarkus-maven-plugin:0.20.0:create \
+    -DprojectGroupId=com.example \
+    -DprojectArtifactId=movies-app \
+    -DclassName="com.example.GreetingResource" \
     -Dpath="/hello"
 ```
 
@@ -136,7 +136,7 @@ mvn io.quarkus:quarkus-maven-plugin:0.20.0:create
 Start application in dev mode: 
 
 ```commandline 
-mvn compile quarkus:dev 
+./mvnw compile quarkus:dev 
 ``` 
 <!-- .element: style="text-align:center" -->
 
@@ -199,7 +199,7 @@ String greeting(String name){
 ### Packaging Quarkus application
 
 ```commandline
-mvn package
+./mvnw package
 ```
 <!-- .element: style="text-align:center" -->
 
@@ -229,7 +229,7 @@ Note:
 ### Using Hibernate ORM and JPA
 
 ```commandline
-mvn quarkus:add-extension 
+./mvnw quarkus:add-extension \
     -Dextensions="quarkus-hibernate-orm,quarkus-jdbc-h2,quarkus-smallrye-openapi,quarkus-resteasy-jsonb"
 ```
 <!-- .element: style="text-align:center" -->
@@ -336,7 +336,7 @@ Bug in `undertow` on Windows using dev mode. Either run from jar or use postman.
 Switch to Panache
 
 ```commandline
-mvn quarkus:add-extension 
+./mvnw quarkus:add-extension \
     -Dextension="quarkus-hibernate-orm-panache"
 ```
 <!-- .element: style="text-align:center" -->
@@ -400,7 +400,7 @@ public class MovieResource {
 MicroProfile Rest Client
 
 ```commandline
-mvn quarkus:add-extension -Dextension="rest-client"
+./mvnw quarkus:add-extension -Dextension="rest-client"
 ```
 <!-- .element: style="text-align:center" -->
 
@@ -469,7 +469,7 @@ Inject REST client and add a new endpoint
 MicroProfile Fault Tolerance
 
 ```commandline
-mvn quarkus:add-extension -Dextension="smallrye-fault-tolerance"
+./mvnw quarkus:add-extension -Dextension="smallrye-fault-tolerance"
 ```
 <!-- .element: style="text-align:center" -->
 
