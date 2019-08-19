@@ -14,6 +14,8 @@ Made using a great library [reval-md](https://github.com/webpro/reveal-md).
 reveal-md slides.md -w
 ```  
 
+[Windows equivalents of commands used on slides](windows-commands.md).  
+
 #### Building static version of slides
 
 ```commandline

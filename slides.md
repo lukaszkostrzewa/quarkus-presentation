@@ -263,7 +263,7 @@ Create an entity class:
 ```java
 @Data
 @Entity
-class Movie {
+public class Movie {
 
     @Id 
     @GeneratedValue
@@ -272,6 +272,18 @@ class Movie {
     private String genre;
     private int year;
 }
+```
+
+---
+
+Add lombok dependency:
+
+```xml
+<dependency>
+  <groupId>org.projectlombok</groupId>
+  <artifactId>lombok</artifactId>
+  <version>1.18.8</version>
+</dependency>
 ```
 
 ---
@@ -301,7 +313,6 @@ Create an `import.sql` script in resources:
 
 ```sql
 insert into movie values 
-    (hibernate_sequence.nextVal, 'La vita è bella', 'Comedy, Drama, Romance', 1997),
     (hibernate_sequence.nextVal, 'The Shawshank Redemption', 'Drama', 1994),
     (hibernate_sequence.nextVal, 'One Flew Over the Cuckoo''s Nest', 'Drama', 1975),
     (hibernate_sequence.nextVal, 'The Lord of the Rings: The Fellowship of the Ring', 'Adventure, Drama, Fantasy', 2001),
@@ -314,7 +325,7 @@ Create a rest endpoint:
 
 ```java
 @Path("/movies")
-@Produces(MediaType.TEXT_PLAIN)
+@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class MovieResource {
 
@@ -387,7 +398,7 @@ Update `MovieResource` class:
 
 ```java
 @Path("/movies")
-@Produces(MediaType.TEXT_PLAIN)
+@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class MovieResource {
 
