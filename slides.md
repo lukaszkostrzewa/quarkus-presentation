@@ -375,13 +375,25 @@ Note:
 ---
 
 ```java
+@Data
 @Entity
-@ToString
+@EqualsAndHashCode(callSuper = true)
 public class Movie extends PanacheEntity {
+
+    static final String YEAR = "year";
+    static final Sort SORT_BY_YEAR = Sort.by(YEAR);
 
     public String title;
     public String genre;
     public int year;
+
+    public static List<Movie> listAll() {
+        return listAll(SORT_BY_YEAR);
+    }
+
+    static List<Movie> listByYear(int year) {
+        return list(YEAR, year);
+    }
 }
 ```
 
@@ -403,8 +415,10 @@ Update `MovieResource` class:
 public class MovieResource {
 
     @GET
-    public List<Movie> movies() {
-        return Movie.listAll();
+    public List<Movie> movies(@QueryParam(YEAR) Integer year) {
+        return Optional.ofNullable(year)
+            .map(Movie::listByYear)
+            .orElseGet(Movie::listAll);
     }
 
     @POST
