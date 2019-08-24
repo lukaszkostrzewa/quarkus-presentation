@@ -550,3 +550,52 @@ Retry options:
 * maxDuration, durationUnit 
 * delay, delayUnit
 * jitter, jitterDelayUnit
+
+---
+
+Create a recommendation service
+
+```java
+@ApplicationScoped
+class RecommendationService {
+
+    List<Movie> getRecommendations(Long id) {
+        List<Movie> recommendations = Movie.list("id != ?1", id);
+        Collections.shuffle(recommendations);
+        return recommendations.subList(0, 2);
+    }
+}
+```
+
+---
+
+Inject it to `MovieResource` and expose a new endpoint 
+
+```java
+    @Inject
+    RecommendationService recommendationService;
+    
+    @GET
+    @Path("/{id}/recommendations")
+    @Timeout(250)
+    public List<Movie> recommendations(@PathParam("id") Long id) {
+        long started = System.currentTimeMillis();
+        long invocationNumber = counter.getAndIncrement();
+
+        try {
+            randomDelay();
+            log.info("Recommendations invocation #{} succeeded", invocationNumber);
+            return recommendationService.getRecommendations(id);
+        } catch (InterruptedException e) {
+            log.error("Recommendations invocation #{} timed out after %{} ms", invocationNumber,
+                System.currentTimeMillis() - started);
+            return null;
+        }
+    }
+
+    private void randomDelay() throws InterruptedException {
+        Thread.sleep(new Random().nextInt(500));
+    }
+```
+
+---

@@ -2,6 +2,7 @@ package com.example;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.inject.Inject;
@@ -34,6 +35,8 @@ public class MovieResource {
     @Inject
     @RestClient
     RatingService ratingService;
+    @Inject
+    RecommendationService recommendationService;
 
     private AtomicLong counter = new AtomicLong(0);
 
@@ -67,5 +70,27 @@ public class MovieResource {
             log.error("Rating invocation #{} failed", invocationNumber);
             throw new RuntimeException("Could not fetch data.");
         }
+    }
+
+    @GET
+    @Path("/{id}/recommendations")
+    @Timeout(250)
+    public List<Movie> recommendations(@PathParam("id") Long id) {
+        long started = System.currentTimeMillis();
+        long invocationNumber = counter.getAndIncrement();
+
+        try {
+            randomDelay();
+            log.info("Recommendations invocation #{} succeeded", invocationNumber);
+            return recommendationService.getRecommendations(id);
+        } catch (InterruptedException e) {
+            log.error("Recommendations invocation #{} timed out after %{} ms", invocationNumber,
+                System.currentTimeMillis() - started);
+            return null;
+        }
+    }
+
+    private void randomDelay() throws InterruptedException {
+        Thread.sleep(new Random().nextInt(500));
     }
 }
