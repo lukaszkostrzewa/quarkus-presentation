@@ -477,7 +477,6 @@ Create the configuration
 
 ```properties
 com.example.RatingService/mp-rest/url=http://www.omdbapi.com/?apikey=PlzBanMe
-com.example.RatingService/mp-rest/scope=java.inject.Singleton
 ```
 
 ---
