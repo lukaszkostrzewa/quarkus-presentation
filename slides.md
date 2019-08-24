@@ -487,13 +487,39 @@ Inject REST client and add a new endpoint
     @Inject
     @RestClient
     RatingService ratingService;
-    
+
     @GET
-    @Path("/{title}/rating")
-    public Rating name(@PathParam("title") String name) {
-        return ratingService.getByTitle(name);
+    @Path("/{id}/rating")
+    public Rating rating(@PathParam("id") Long id) {
+        String title = Movie.<Movie>findById(id).getTitle();
+        return ratingService.getByTitle(title);
     }
-    
+```
+
+---
+
+Let's suppose our RatingService may fail...
+
+```java
+@Slf4j
+public class MovieResource {
+    //...    
+    private AtomicLong counter = new AtomicLong(0);
+    //...
+    public Rating rating(@PathParam("id") Long id) {
+        Long invocationNumber = counter.getAndIncrement();
+        maybeFail(invocationNumber);
+        log.info("Rating invocation #{} succeeded", invocationNumber);
+        //...
+    }
+
+    private void maybeFail(Long invocationNumber) {
+        if (new Random().nextBoolean()) {
+            log.error("Rating invocation #{} failed", invocationNumber);
+            throw new RuntimeException("Could not fetch data.");
+        }
+    }
+}
 ```
 
 ---
