@@ -477,7 +477,6 @@ Create the configuration
 
 ```properties
 com.example.RatingService/mp-rest/url=http://www.omdbapi.com/?apikey=PlzBanMe
-com.example.RatingService/mp-rest/scope=java.inject.Singleton
 ```
 
 ---
@@ -491,7 +490,6 @@ Inject REST client and add a new endpoint
     
     @GET
     @Path("/{title}/rating")
-    @Produces(MediaType.APPLICATION_JSON)
     public Rating name(@PathParam("title") String name) {
         return ratingService.getByTitle(name);
     }

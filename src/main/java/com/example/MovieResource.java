@@ -1,10 +1,14 @@
 package com.example;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -22,6 +26,10 @@ import static com.example.Movie.YEAR;
 @Consumes(MediaType.APPLICATION_JSON)
 public class MovieResource {
 
+    @Inject
+    @RestClient
+    RatingService ratingService;
+
     @GET
     public List<Movie> movies(@QueryParam(YEAR) Integer year) {
         return Optional.ofNullable(year)
@@ -33,5 +41,12 @@ public class MovieResource {
     @Transactional
     public void save(Movie movie) {
         movie.persist();
+    }
+
+    @GET
+    @Path("/{id}/rating")
+    public Rating rating(@PathParam("id") Long id) {
+        String title = Movie.<Movie>findById(id).getTitle();
+        return ratingService.getByTitle(title);
     }
 }
