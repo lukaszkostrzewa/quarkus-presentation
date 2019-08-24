@@ -20,9 +20,9 @@ public class Movie extends PanacheEntity {
     static final String YEAR = "year";
     static final Sort SORT_BY_YEAR = Sort.by(YEAR);
 
-    public String title;
-    public String genre;
-    public int year;
+    private String title;
+    private String genre;
+    private int year;
 
     public static List<Movie> listAll() {
         return listAll(SORT_BY_YEAR);
