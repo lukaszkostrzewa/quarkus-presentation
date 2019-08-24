@@ -1,6 +1,7 @@
 package com.example;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.inject.Inject;
@@ -51,6 +52,7 @@ public class MovieResource {
 
     @GET
     @Path("/{id}/rating")
+    @Retry(maxRetries = 4)
     public Rating rating(@PathParam("id") Long id) {
         final Long invocationNumber = counter.getAndIncrement();
         maybeFail(invocationNumber);

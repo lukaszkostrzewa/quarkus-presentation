@@ -532,3 +532,21 @@ MicroProfile Fault Tolerance
 <!-- .element: style="text-align:center" -->
 
 ---
+
+`@Retry`
+
+```java
+@Retry(maxRetries = 4)
+public Rating rating(@PathParam("id") Long id) {
+    //...
+}
+```
+
+Note:
+
+Retry options:
+* maxRetries 
+* retryOn / abortOn
+* maxDuration, durationUnit 
+* delay, delayUnit
+* jitter, jitterDelayUnit
