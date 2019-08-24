@@ -587,7 +587,7 @@ Inject it to `MovieResource` and expose a new endpoint
             log.info("Recommendations invocation #{} succeeded", invocationNumber);
             return recommendationService.getRecommendations(id);
         } catch (InterruptedException e) {
-            log.error("Recommendations invocation #{} timed out after %{} ms", invocationNumber,
+            log.error("Recommendations invocation #{} timed out after {} ms", invocationNumber,
                 System.currentTimeMillis() - started);
             return null;
         }
@@ -597,5 +597,9 @@ Inject it to `MovieResource` and expose a new endpoint
         Thread.sleep(new Random().nextInt(500));
     }
 ```
+
+---
+
+
 
 ---

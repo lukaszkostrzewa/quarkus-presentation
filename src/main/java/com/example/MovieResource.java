@@ -84,7 +84,7 @@ public class MovieResource {
             log.info("Recommendations invocation #{} succeeded", invocationNumber);
             return recommendationService.getRecommendations(id);
         } catch (InterruptedException e) {
-            log.error("Recommendations invocation #{} timed out after %{} ms", invocationNumber,
+            log.error("Recommendations invocation #{} timed out after {} ms", invocationNumber,
                 System.currentTimeMillis() - started);
             return null;
         }
