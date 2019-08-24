@@ -569,7 +569,7 @@ class RecommendationService {
 
 ---
 
-Inject it to `MovieResource` and expose a new endpoint 
+Use it in `MovieResource` 
 
 ```java
     @Inject
@@ -600,6 +600,19 @@ Inject it to `MovieResource` and expose a new endpoint
 
 ---
 
+Add a fallback method
 
+```java
+
+    @Fallback(fallbackMethod = "fallbackRecommendations")
+    public List<Movie> recommendations(@PathParam("id") Long id) {
+        //...
+    }
+
+    private List<Movie> fallbackRecommendations(Long id) {
+        log.info("Recommendation fallback...");
+        return List.of(Movie.findById(id != 1L ? 1L : 2L));
+    }
+```
 
 ---

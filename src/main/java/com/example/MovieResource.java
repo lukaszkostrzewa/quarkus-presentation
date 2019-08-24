@@ -1,6 +1,7 @@
 package com.example;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -75,6 +76,7 @@ public class MovieResource {
     @GET
     @Path("/{id}/recommendations")
     @Timeout(250)
+    @Fallback(fallbackMethod = "fallbackRecommendations")
     public List<Movie> recommendations(@PathParam("id") Long id) {
         long started = System.currentTimeMillis();
         long invocationNumber = counter.getAndIncrement();
@@ -88,6 +90,11 @@ public class MovieResource {
                 System.currentTimeMillis() - started);
             return null;
         }
+    }
+
+    private List<Movie> fallbackRecommendations(Long id) {
+        log.info("Recommendation fallback...");
+        return List.of(Movie.findById(id != 1L ? 1L : 2L));
     }
 
     private void randomDelay() throws InterruptedException {
