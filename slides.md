@@ -616,3 +616,10 @@ Add a fallback method
 ```
 
 ---
+
+### Summary
+
+* We've created a simple app exposing REST endpoints via RESTEasy
+* We've connected to H2 database using JPA / Hibernate (Panache)
+* We've used MicroProfile Rest Client to fetch movies ratings
+* We've used MicroProfile Fault Tolerance to make app resilient
