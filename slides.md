@@ -124,7 +124,7 @@ Get quarked! and let’s start building some hadrons
 Create a new project:
 
 ```commandline
-mvn io.quarkus:quarkus-maven-plugin:0.21.1:create \
+mvn io.quarkus:quarkus-maven-plugin:1.0.0.CR1:create \
     -DprojectGroupId=com.example \
     -DprojectArtifactId=movies-app \
     -DclassName="com.example.GreetingResource" \
@@ -258,6 +258,18 @@ quarkus.hibernate-orm.log.sql=true
 
 ---
 
+Add lombok dependency:
+
+```xml
+<dependency>
+  <groupId>org.projectlombok</groupId>
+  <artifactId>lombok</artifactId>
+  <version>1.18.8</version>
+</dependency>
+```
+
+---
+
 Create an entity class: 
 
 ```java
@@ -272,18 +284,6 @@ public class Movie {
     private String genre;
     private int year;
 }
-```
-
----
-
-Add lombok dependency:
-
-```xml
-<dependency>
-  <groupId>org.projectlombok</groupId>
-  <artifactId>lombok</artifactId>
-  <version>1.18.8</version>
-</dependency>
 ```
 
 ---

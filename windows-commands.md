@@ -5,7 +5,7 @@ Windows versions of commands used on [slides](slides.md).
 1. Create a new Quarkus project
 
     ```commandline
-    mvn io.quarkus:quarkus-maven-plugin:0.21.1:create ^
+    mvn io.quarkus:quarkus-maven-plugin:1.0.0.CR1:create ^
         -DprojectGroupId=com.example ^
         -DprojectArtifactId=movies-app ^
         -DclassName="com.example.GreetingResource" ^
