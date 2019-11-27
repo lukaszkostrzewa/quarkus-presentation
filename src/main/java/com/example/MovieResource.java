@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.inject.Inject;
@@ -22,6 +24,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.Movie.YEAR;
+import static org.eclipse.microprofile.metrics.MetricUnits.MILLISECONDS;
 
 /**
  * @author Lukasz Kostrzewa (SG0221165)
@@ -42,6 +45,8 @@ public class MovieResource {
     private AtomicLong counter = new AtomicLong(0);
 
     @GET
+    @Counted(name = "getMoviesCounter", description = "How many times movies endpoint has been called")
+    @Timed(name = "getMoviesTimer", description = "A measure of how long it takes to get movies", unit = MILLISECONDS)
     public List<Movie> movies(@QueryParam(YEAR) Integer year) {
         return Optional.ofNullable(year)
             .map(Movie::listByYear)

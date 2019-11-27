@@ -50,7 +50,7 @@ mvn package -Pnative
 
 * Quarkus extension framework reduces the complexity for making third-party frameworks run on Quarkus and compile to a GraalVM native binary
 
-* Kotlin support
+* Kotlin and Scala support
 
 ---
 
@@ -59,6 +59,8 @@ Use programming model you already know
 ---
 
 → Inject dependencies with CDI annotations
+
+(but you can use Spring annotations as well)
 
 ---
 
@@ -348,9 +350,6 @@ public class MovieResource {
 
 SwaggerUI
 
-Note:
-Bug in `undertow` on Windows using dev mode. Either run from jar or use postman.  
-
 ---
 
 Switch to Panache
@@ -498,6 +497,15 @@ Inject REST client and add a new endpoint
 
 ---
 
+MicroProfile Fault Tolerance
+
+```commandline
+./mvnw quarkus:add-extension -Dextension="smallrye-fault-tolerance"
+```
+<!-- .element: style="text-align:center" -->
+
+---
+
 Let's suppose our RatingService may fail...
 
 ```java
@@ -521,15 +529,6 @@ public class MovieResource {
     }
 }
 ```
-
----
-
-MicroProfile Fault Tolerance
-
-```commandline
-./mvnw quarkus:add-extension -Dextension="smallrye-fault-tolerance"
-```
-<!-- .element: style="text-align:center" -->
 
 ---
 
@@ -617,9 +616,84 @@ Add a fallback method
 
 ---
 
+MicroProfile Health
+
+```commandline
+./mvnw quarkus:add-extension -Dextension="health"
+```
+<!-- .element: style="text-align:center" -->
+
+---
+
+`/health/live` - app is up and running
+
+`/health/ready` - app is ready to serve requests
+
+`/health` - accumulating both 
+
+Note:
+* liveness - should the application be restarted 
+* readiness - does it makes sense to contact the application with requests
+* each extension can register its own health checks (e.g. `quarkus-agroal`)
+* extension health check can be disabled via property `quarkus.health.extensions.enabled`
+
+---
+
+`@Liveness` / `@Readiness`
+
+```java
+@Liveness
+@ApplicationScoped
+public class MovieAppHealthCheck implements HealthCheck {
+
+    @Override
+    public HealthCheckResponse call() {
+        return HealthCheckResponse.up("MovieApp is up");
+    }
+}
+```
+
+---
+
+MicroProfile Metrics
+
+```commandline
+./mvnw quarkus:add-extension -Dextension="metrics"
+```
+<!-- .element: style="text-align:center" -->
+
+<small>(in our case it's already present - `smallrye-fault-tolerance` dependency)</small>
+
+---
+
+`/metrics/application`
+
+`/metrics/base` 
+
+`/metrics/vendor` 
+
+`/metrics`
+
+---
+
+```java
+@GET
+@Counted(name = "getMoviesCounter", description = "How many times movies endpoint has been called")
+@Timed(name = "getMoviesTimer", description = "A measure of how long it takes to get movies", unit = MILLISECONDS)
+public List<Movie> movies(@QueryParam(YEAR) Integer year) {
+    // ...
+}
+```
+
+---
+
 ### Summary
 
 * We've created a simple app exposing REST endpoints via RESTEasy
 * We've connected to H2 database using JPA / Hibernate (Panache)
 * We've used MicroProfile Rest Client to fetch movies ratings
+
+---
+
 * We've used MicroProfile Fault Tolerance to make app resilient
+* We've added health check and metrics to easily monitor our application
